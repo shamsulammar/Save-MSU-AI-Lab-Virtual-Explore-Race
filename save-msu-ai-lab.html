@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Save MSU AI Lab — Virtual Explore Race</title>
+<meta name="description" content="A.I.R.E.S. has infected the MSU AI Lab. Recover 7 Security Keys before the countdown hits zero.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#060a14;
+  --bg2:#0b1224;
+  --panel:rgba(11,18,36,.74);
+  --panel-solid:#0b1224;
+  --border:rgba(0,217,255,.28);
+  --border-strong:rgba(0,217,255,.55);
+  --blue:#00d9ff;
+  --blue-dim:#0891b2;
+  --violet:#7b2ff7;
+  --pink:#ff2e88;
+  --green:#00ffa3;
+  --amber:#ffb020;
+  --red:#ff3b5c;
+  --text:#cfe0f5;
+  --text-dim:#6d84a8;
+  --font-display:'Orbitron',sans-serif;
+  --font-body:'Rajdhani',sans-serif;
+  --font-mono:'Share Tech Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{
+  background:radial-gradient(ellipse at 50% -10%,#0d1a33 0%,var(--bg) 55%),var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  min-height:100vh;
+  overflow-x:hidden;
+  position:relative;
+  -webkit-font-smoothing:antialiased;
+}
+#particles{position:fixed;inset:0;z-index:0;pointer-events:none;}
+.scanlines{
+  position:fixed;inset:0;z-index:2;pointer-events:none;
+  background:repeating-linear-gradient(to bottom,rgba(255,255,255,0.025) 0px,rgba(255,255,255,0.025) 1px,transparent 1px,transparent 3px);
+  mix-blend-mode:overlay;
+}
+.vignette{position:fixed;inset:0;z-index:1;pointer-events:none;box-shadow:inset 0 0 18vw 2vw rgba(0,0,0,.75);}
+.app{position:relative;z-index:3;min-height:100vh;display:flex;flex-direction:column;}
+.screen{display:none;flex:1;flex-direction:column;align-items:center;padding:clamp(16px,4vw,40px);animation:fadeIn .5s ease;}
+.screen.active{display:flex;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+h1,h2,h3{font-family:var(--font-display);letter-spacing:.03em;}
+.eyebrow{font-family:var(--font-mono);color:var(--blue);letter-spacing:.25em;font-size:.72rem;text-transform:uppercase;}
+.panel{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:14px;
+  backdrop-filter:blur(10px);
+  box-shadow:0 0 0 1px rgba(0,217,255,.05),0 20px 60px -20px rgba(0,0,0,.7);
+}
+.btn{
+  font-family:var(--font-display);
+  font-weight:700;
+  font-size:.85rem;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--bg);
+  background:linear-gradient(135deg,var(--blue),var(--blue-dim));
+  border:none;
+  padding:14px 28px;
+  border-radius:8px;
+  cursor:pointer;
+  box-shadow:0 0 18px -2px rgba(0,217,255,.6),0 4px 0 0 #0891b280;
+  transition:transform .15s ease,box-shadow .15s ease;
+}
+.btn:hover{transform:translateY(-2px);box-shadow:0 0 26px 0px rgba(0,217,255,.85),0 6px 0 0 #0891b280;}
+.btn:active{transform:translateY(1px);box-shadow:0 0 10px 0px rgba(0,217,255,.6),0 1px 0 0 #0891b280;}
+.btn:focus-visible{outline:2px solid var(--green);outline-offset:3px;}
+.btn.secondary{
+  background:transparent;color:var(--blue);border:1px solid var(--border-strong);
+  box-shadow:none;
+}
+.btn.secondary:hover{background:rgba(0,217,255,.08);box-shadow:0 0 14px -4px rgba(0,217,255,.5);}
+.btn.danger{background:linear-gradient(135deg,var(--red),#a4102b);box-shadow:0 0 18px -2px rgba(255,59,92,.6),0 4px 0 0 #7a0f2380;}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none;}
+.btn-row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:22px;}
+
+input[type=text],select{
+  font-family:var(--font-mono);
+  background:#050a16;
+  border:1px solid var(--border-strong);
+  color:var(--green);
+  padding:12px 14px;
+  border-radius:8px;
+  font-size:1rem;
+  width:100%;
+  letter-spacing:.05em;
+}
+input[type=text]:focus,select:focus{outline:2px solid var(--blue);outline-offset:2px;}
+input[type=text]::placeholder{color:var(--text-dim);}
+
+/* ---- Title / glitch ---- */
+.glitch-title{
+  font-size:clamp(1.8rem,6vw,3.4rem);
+  font-weight:900;
+  text-align:center;
+  color:#fff;
+  text-shadow:0 0 12px rgba(0,217,255,.9),0 0 40px rgba(123,47,247,.5);
+  position:relative;
+  line-height:1.15;
+}
+@media (prefers-reduced-motion:no-preference){
+  .glitch-title{animation:flicker 6s infinite;}
+}
+@keyframes flicker{
+  0%,93%,100%{opacity:1;}
+  94%{opacity:.55;}
+  95%{opacity:1;}
+  96%{opacity:.7;}
+  97%{opacity:1;}
+}
+
+/* ---- Instructions / briefing ---- */
+.container{width:100%;max-width:880px;margin:0 auto;}
+.brief-panel{padding:clamp(20px,4vw,40px);margin-top:22px;}
+.brief-panel p{margin-bottom:14px;line-height:1.6;color:var(--text);}
+.brief-panel ul{margin:10px 0 10px 22px;line-height:1.7;}
+.brief-panel li::marker{color:var(--blue);}
+.mono{font-family:var(--font-mono);}
+.tag{
+  display:inline-block;font-family:var(--font-mono);font-size:.72rem;
+  border:1px solid var(--border-strong);color:var(--blue);border-radius:20px;
+  padding:3px 10px;margin:2px 4px 2px 0;
+}
+.rule-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:16px;}
+.rule-card{border:1px solid var(--border);border-radius:10px;padding:14px;background:rgba(0,217,255,.04);}
+.rule-card .num{font-family:var(--font-mono);color:var(--blue);font-size:.75rem;}
+.rule-card p{font-size:.9rem;color:var(--text-dim);margin:4px 0 0;}
+
+/* ---- HUD ---- */
+.hud{
+  width:100%;max-width:980px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;
+  justify-content:space-between;padding:14px 18px;margin-bottom:20px;
+}
+.hud-block{display:flex;flex-direction:column;gap:2px;}
+.hud-label{font-family:var(--font-mono);font-size:.65rem;color:var(--text-dim);letter-spacing:.15em;text-transform:uppercase;}
+.hud-value{font-family:var(--font-mono);font-size:1.1rem;color:var(--blue);}
+#timerVal.warn{color:var(--red);animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.mute-btn{background:none;border:1px solid var(--border-strong);color:var(--blue);border-radius:8px;padding:8px 10px;cursor:pointer;font-family:var(--font-mono);}
+
+/* ---- Keyring (signature element) ---- */
+.keyring{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+.key-slot{
+  width:38px;height:38px;border-radius:50%;border:1px solid var(--border-strong);
+  display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);
+  font-weight:700;color:var(--text-dim);background:rgba(255,255,255,.02);
+  transition:all .4s ease;
+}
+.key-slot.filled{
+  color:#00120c;background:radial-gradient(circle at 35% 30%,#7dffd4,var(--green));
+  box-shadow:0 0 14px 2px rgba(0,255,163,.7);
+  border-color:var(--green);
+  animation:keyPop .5s ease;
+}
+@keyframes keyPop{0%{transform:scale(.4);}60%{transform:scale(1.25);}100%{transform:scale(1);}}
+
+.progress-track{width:100%;max-width:980px;height:8px;border-radius:6px;background:rgba(255,255,255,.06);overflow:hidden;margin-bottom:26px;border:1px solid var(--border);}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--green));width:0%;transition:width .6s ease;box-shadow:0 0 12px rgba(0,255,163,.6);}
+
+/* ---- Map ---- */
+.map-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:16px;width:100%;max-width:980px;
+}
+.station-card{
+  padding:18px;cursor:pointer;position:relative;overflow:hidden;
+  border:1px solid var(--border);transition:transform .2s ease,border-color .2s ease;
+  text-align:left;
+}
+.station-card:hover:not(.locked){transform:translateY(-4px);border-color:var(--border-strong);}
+.station-card:focus-visible{outline:2px solid var(--green);outline-offset:2px;}
+.station-card .sicon{width:38px;height:38px;margin-bottom:10px;}
+.station-card h3{font-size:1rem;margin-bottom:4px;}
+.station-card .status{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.1em;color:var(--text-dim);text-transform:uppercase;}
+.station-card.locked{opacity:.42;cursor:not-allowed;filter:grayscale(.6);}
+.station-card.done{border-color:var(--green);box-shadow:0 0 18px -6px rgba(0,255,163,.5);}
+.station-card.done .status{color:var(--green);}
+.station-card.current{border-color:var(--blue);box-shadow:0 0 22px -4px rgba(0,217,255,.6);}
+.station-card.current .status{color:var(--blue);}
+.station-card .badge{position:absolute;top:10px;right:12px;font-family:var(--font-mono);font-size:.7rem;color:var(--text-dim);}
+
+/* ---- Station modal ---- */
+.station-view{width:100%;max-width:760px;padding:clamp(18px,4vw,34px);}
+.station-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px;}
+.station-head h2{font-size:clamp(1.1rem,3vw,1.5rem);}
+.mission-text{font-family:var(--font-mono);color:var(--text-dim);font-size:.85rem;margin-bottom:18px;line-height:1.6;}
+.puzzle-box{background:#040810;border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:16px;}
+.cipher-text{font-family:var(--font-mono);font-size:1.6rem;letter-spacing:.2em;color:var(--pink);text-align:center;text-shadow:0 0 12px rgba(255,46,136,.6);margin:8px 0;}
+.feedback{font-family:var(--font-mono);font-size:.85rem;min-height:1.4em;margin-top:10px;}
+.feedback.ok{color:var(--green);}
+.feedback.bad{color:var(--red);}
+.hidden-word-text{line-height:1.9;color:var(--text-dim);font-size:.95rem;}
+.hidden-word-text .hl{color:var(--blue);text-shadow:0 0 8px rgba(0,217,255,.7);font-weight:700;border-bottom:1px dashed var(--blue);}
+
+.seq-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:14px;}
+.seq-chip{
+  font-family:var(--font-mono);border:1px solid var(--border-strong);color:var(--blue);
+  padding:10px 14px;border-radius:8px;cursor:pointer;background:rgba(0,217,255,.05);
+  transition:all .2s;
+}
+.seq-chip:hover{background:rgba(0,217,255,.15);}
+.seq-chip:disabled{opacity:.25;cursor:not-allowed;}
+.seq-answer{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;min-height:44px;padding:10px;border:1px dashed var(--border);border-radius:8px;margin-bottom:14px;}
+.seq-answer span{font-family:var(--font-mono);background:rgba(0,255,163,.1);color:var(--green);border:1px solid var(--green);padding:6px 10px;border-radius:6px;font-size:.85rem;}
+
+.mcq-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;}
+.mcq-opt{
+  font-family:var(--font-body);font-weight:600;border:1px solid var(--border-strong);
+  color:var(--text);background:rgba(255,255,255,.02);padding:12px;border-radius:8px;cursor:pointer;text-align:center;
+}
+.mcq-opt:hover{background:rgba(0,217,255,.1);}
+.mcq-opt.correct{border-color:var(--green);color:var(--green);background:rgba(0,255,163,.1);}
+.mcq-opt.wrong{border-color:var(--red);color:var(--red);background:rgba(255,59,92,.1);animation:shake .3s;}
+@keyframes shake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+
+.vision-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;}
+.vision-item{border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;}
+.vision-item svg{width:56px;height:56px;margin-bottom:8px;}
+.vision-item select{margin-top:6px;font-size:.8rem;}
+.vision-item.correct{border-color:var(--green);box-shadow:0 0 12px -4px rgba(0,255,163,.5);}
+
+/* ---- Server room ---- */
+.password-display{display:flex;gap:8px;justify-content:center;margin:16px 0;flex-wrap:wrap;}
+.pw-letter{width:42px;height:52px;border:1px solid var(--border-strong);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:1.4rem;color:var(--green);}
+
+/* ---- Victory / gameover ---- */
+.result-panel{padding:clamp(24px,5vw,50px);text-align:center;max-width:640px;width:100%;}
+.result-stats{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin:24px 0;}
+.stat{min-width:120px;}
+.stat .v{font-family:var(--font-display);font-size:1.8rem;color:var(--blue);text-shadow:0 0 10px rgba(0,217,255,.6);}
+.stat .l{font-family:var(--font-mono);font-size:.68rem;color:var(--text-dim);letter-spacing:.12em;text-transform:uppercase;}
+
+footer{position:relative;z-index:3;text-align:center;padding:16px;font-family:var(--font-mono);font-size:.7rem;color:var(--text-dim);}
+
+/* ---- modal (hints / admin) ---- */
+.overlay{position:fixed;inset:0;background:rgba(2,4,10,.8);backdrop-filter:blur(4px);z-index:20;display:none;align-items:center;justify-content:center;padding:20px;}
+.overlay.active{display:flex;}
+.modal-box{max-width:420px;width:100%;padding:26px;}
+.modal-box h3{margin-bottom:10px;color:var(--blue);}
+.modal-box p{color:var(--text-dim);font-size:.9rem;line-height:1.6;margin-bottom:16px;}
+
+.small-link{background:none;border:none;color:var(--text-dim);font-family:var(--font-mono);font-size:.72rem;text-decoration:underline;cursor:pointer;letter-spacing:.05em;}
+.small-link:hover{color:var(--blue);}
+
+@media (max-width:520px){
+  .hud{justify-content:center;text-align:center;}
+  .result-stats{gap:14px;}
+}
+</style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+<div class="vignette"></div>
+<div class="scanlines"></div>
+
+<div class="app">
+
+  <!-- ============ SCREEN 0: INSTRUCTIONS ============ -->
+  <section class="screen active" id="screen-instructions">
+    <div class="container">
+      <p class="eyebrow" style="text-align:center;">A.I.R.E.S. INCIDENT · CLASSIFIED BRIEFING</p>
+      <h1 class="glitch-title">SAVE MSU AI LAB</h1>
+      <div class="panel brief-panel">
+        <h2 style="color:var(--blue);font-size:1.1rem;margin-bottom:10px;">How this works</h2>
+        <p>This is a self-contained browser game. Each team opens this same link on <strong>one device</strong> (phone or laptop), enters their team name, and races through 7 stations to stop the A.I.R.E.S. virus before the 60‑minute clock runs out.</p>
+        <div class="rule-grid">
+          <div class="rule-card"><span class="num">01</span><h3 style="font-size:.95rem;margin-top:2px;">Sequential stations</h3><p>Stations unlock one at a time. Solve a station to earn a Security Key and open the next.</p></div>
+          <div class="rule-card"><span class="num">02</span><h3 style="font-size:.95rem;margin-top:2px;">Scoring</h3><p>+100 points per correct solve. −20 points per wrong attempt. Score can't go below 0.</p></div>
+          <div class="rule-card"><span class="num">03</span><h3 style="font-size:.95rem;margin-top:2px;">Timer</h3><p>60:00 countdown starts when the mission begins and never pauses or resets.</p></div>
+          <div class="rule-card"><span class="num">04</span><h3 style="font-size:.95rem;margin-top:2px;">Hints</h3><p>3 hints total for the whole race. Each hint costs 10 points.</p></div>
+          <div class="rule-card"><span class="num">05</span><h3 style="font-size:.95rem;margin-top:2px;">Finish</h3><p>Collect all 7 keys, enter the final override code at the Server Room, and the virus is deactivated.</p></div>
+          <div class="rule-card"><span class="num">06</span><h3 style="font-size:.95rem;margin-top:2px;">Progress saves</h3><p>If a browser tab closes by accident, reopening the link resumes that team's run.</p></div>
+        </div>
+        <p style="margin-top:18px;font-size:.85rem;color:var(--text-dim);">Facilitator note: each team's score lives in that device's browser only — there's no shared server. Have teams screenshot their Victory screen (or read out their score) so you can rank teams at the end.</p>
+        <div style="text-align:center;margin-top:6px;">
+          <button class="small-link" id="openHostGuide">Hosting this on GitHub Pages ▾</button>
+        </div>
+        <div id="hostGuide" style="display:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);">
+          <p><span class="tag">1</span> Push this file to a GitHub repo as <span class="mono">index.html</span>.</p>
+          <p><span class="tag">2</span> Repo → Settings → Pages → Deploy from branch → <span class="mono">main</span> / root → Save.</p>
+          <p><span class="tag">3</span> GitHub gives you a link like <span class="mono">https://username.github.io/repo</span>. Share that link with all teams.</p>
+          <p style="margin-bottom:0;">No build step, no backend, no installs — it's one static file.</p>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="btnToTeam">Begin Mission Setup</button>
+        <button class="btn secondary" id="btnAdminOpen">Host / Admin</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN 1: TEAM NAME ============ -->
+  <section class="screen" id="screen-team">
+    <div class="container" style="max-width:480px;">
+      <p class="eyebrow" style="text-align:center;">IDENTIFY YOUR UNIT</p>
+      <h2 style="text-align:center;margin:8px 0 20px;font-size:1.6rem;">Team Registration</h2>
+      <div class="panel" style="padding:24px;">
+        <label class="hud-label" for="teamNameInput">Team name</label>
+        <div style="height:8px;"></div>
+        <input type="text" id="teamNameInput" placeholder="e.g. NULL POINTERS" maxlength="28">
+        <div class="feedback bad" id="teamNameError"></div>
+        <div class="btn-row">
+          <button class="btn" id="btnToBriefing">Confirm & Continue</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN 2: BRIEFING ============ -->
+  <section class="screen" id="screen-briefing">
+    <div class="container">
+      <p class="eyebrow" style="text-align:center;">INCOMING TRANSMISSION</p>
+      <h2 style="text-align:center;margin:8px 0 6px;font-size:1.5rem;color:var(--red);text-shadow:0 0 12px rgba(255,59,92,.6);">MISSION BRIEFING</h2>
+      <div class="panel brief-panel mono" style="font-size:.95rem;line-height:1.8;">
+        <p>&gt; 10:00 AM — The Artificial Intelligence Laboratory at Management &amp; Science University (MSU) has been breached.</p>
+        <p>&gt; Intruder identified: <span style="color:var(--pink);">SHADOW ZERO</span></p>
+        <p>&gt; Payload deployed: <span style="color:var(--amber);">A.I.R.E.S.</span> — Artificial Intelligence Research Encryption System</p>
+        <p>&gt; T-minus 60:00 until all research is encrypted, student projects are deleted, and the AI servers shut down permanently.</p>
+        <p>&gt; Recovery protocol: locate <span style="color:var(--green);">7 Security Keys</span> hidden across the campus network and re-authenticate at the Server Room.</p>
+        <p style="color:var(--blue);">&gt; Agent <span id="briefTeamName">TEAM</span>, the lab is counting on you. Good luck.</p>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="btnToMap">Enter Campus Network</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN 3: MAP ============ -->
+  <section class="screen" id="screen-map">
+    <div class="hud panel">
+      <div class="hud-block"><span class="hud-label">Team</span><span class="hud-value" id="hudTeam">—</span></div>
+      <div class="hud-block"><span class="hud-label">Time Remaining</span><span class="hud-value" id="timerVal">60:00</span></div>
+      <div class="hud-block"><span class="hud-label">Score</span><span class="hud-value" id="hudScore">0</span></div>
+      <div class="hud-block"><span class="hud-label">Hints Left</span><span class="hud-value" id="hudHints">3</span></div>
+      <button class="mute-btn" id="btnMute" aria-label="Toggle sound">SOUND: ON</button>
+    </div>
+    <div class="keyring" id="keyring" style="margin-bottom:12px;"></div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="map-grid" id="mapGrid"></div>
+  </section>
+
+  <!-- ============ SCREEN 4: STATION ============ -->
+  <section class="screen" id="screen-station">
+    <div class="hud panel" style="max-width:760px;">
+      <div class="hud-block"><span class="hud-label">Time Remaining</span><span class="hud-value" id="timerValStation">60:00</span></div>
+      <div class="hud-block"><span class="hud-label">Score</span><span class="hud-value" id="hudScoreStation">0</span></div>
+      <button class="btn secondary" id="btnHint" style="padding:8px 14px;font-size:.7rem;">USE HINT</button>
+    </div>
+    <div class="panel station-view" id="stationView"></div>
+    <button class="small-link" id="btnBackMap" style="margin-top:14px;">← Back to campus map</button>
+  </section>
+
+  <!-- ============ SCREEN 5: VICTORY ============ -->
+  <section class="screen" id="screen-victory">
+    <div class="panel result-panel">
+      <p class="eyebrow">A.I.R.E.S. NEUTRALIZED</p>
+      <h1 class="glitch-title" style="font-size:clamp(1.6rem,5vw,2.4rem);color:var(--green);text-shadow:0 0 14px rgba(0,255,163,.8);">VIRUS DEACTIVATED</h1>
+      <p style="margin-top:10px;color:var(--text-dim);">The MSU AI Lab is secure. Well done, <span id="victoryTeam" class="mono" style="color:var(--blue);">TEAM</span>.</p>
+      <div class="result-stats">
+        <div class="stat"><div class="v" id="victoryScore">0</div><div class="l">Final Score</div></div>
+        <div class="stat"><div class="v" id="victoryTime">00:00</div><div class="l">Completion Time</div></div>
+        <div class="stat"><div class="v" id="victoryHints">0</div><div class="l">Hints Used</div></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="btnCertificate">Download Certificate</button>
+        <button class="btn secondary" id="btnRestartVictory">Play Again / New Team</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN 6: GAME OVER ============ -->
+  <section class="screen" id="screen-gameover">
+    <div class="panel result-panel">
+      <p class="eyebrow" style="color:var(--red);">TIME EXPIRED</p>
+      <h1 class="glitch-title" style="font-size:clamp(1.6rem,5vw,2.4rem);color:var(--red);text-shadow:0 0 14px rgba(255,59,92,.8);">SERVERS ENCRYPTED</h1>
+      <p style="margin-top:10px;color:var(--text-dim);">The countdown reached zero before <span id="gameoverTeam" class="mono" style="color:var(--blue);">TEAM</span> could finish. <span id="gameoverKeys"></span> of 7 keys recovered.</p>
+      <div class="result-stats">
+        <div class="stat"><div class="v" id="gameoverScore">0</div><div class="l">Final Score</div></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn danger" id="btnRestartGameover">Try Again</button>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<footer>SAVE MSU AI LAB · VIRTUAL EXPLORE RACE · RUNS ENTIRELY IN YOUR BROWSER</footer>
+
+<!-- ============ HINT MODAL ============ -->
+<div class="overlay" id="hintOverlay">
+  <div class="panel modal-box">
+    <h3>Hint</h3>
+    <p id="hintText"></p>
+    <div class="btn-row" style="margin-top:0;">
+      <button class="btn secondary" id="btnCloseHint">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ADMIN MODAL ============ -->
+<div class="overlay" id="adminOverlay">
+  <div class="panel modal-box" style="max-width:460px;">
+    <h3>Host / Admin Panel</h3>
+    <p id="adminGate">Enter the host password to view this browser's current run and reset controls. Note: this only shows the team currently active on <em>this device</em> — there's no shared server, so it can't monitor other teams' devices remotely.</p>
+    <input type="text" id="adminPassInput" placeholder="Host password" style="margin-bottom:10px;">
+    <div id="adminPanel" style="display:none;">
+      <p class="mono" id="adminInfo" style="color:var(--text);font-size:.85rem;"></p>
+    </div>
+    <div class="btn-row" style="margin-top:0;">
+      <button class="btn secondary" id="btnAdminUnlock">Unlock</button>
+      <button class="btn danger" id="btnAdminReset">Force Reset This Device</button>
+      <button class="btn secondary" id="btnAdminClose">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ================= CONFIG ================= */
+const HOST_PASSWORD = "msuadmin"; // change before publishing if you want a different host password
+const TOTAL_SECONDS = 60*60;
+const REDUCE_MOTION = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const STORAGE_KEY = "msu_aires_race_v1";
+
+/* ================= AUDIO (WebAudio beeps, no external files) ================= */
+let actx=null;
+function audioCtx(){ if(!actx){ try{ actx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ actx=null; } } return actx; }
+function beep(freq,dur,type,vol,delay){
+  if(state.muted) return;
+  const ctx = audioCtx(); if(!ctx) return;
+  const t0 = ctx.currentTime + (delay||0);
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = type||'sine';
+  osc.frequency.setValueAtTime(freq,t0);
+  gain.gain.setValueAtTime(0,t0);
+  gain.gain.linearRampToValueAtTime(vol||0.15,t0+0.02);
+  gain.gain.exponentialRampToValueAtTime(0.001,t0+dur);
+  osc.connect(gain).connect(ctx.destination);
+  osc.start(t0); osc.stop(t0+dur+0.02);
+}
+function sfxCorrect(){ beep(660,.14,'square',.12,0); beep(990,.18,'square',.12,.12); }
+function sfxWrong(){ beep(180,.28,'sawtooth',.14,0); }
+function sfxKey(){ beep(520,.1,'triangle',.12,0); beep(780,.1,'triangle',.12,.09); beep(1040,.18,'triangle',.14,.18); }
+function sfxVictory(){ [523,659,784,1046].forEach((f,i)=>beep(f,.3,'square',.12,i*.14)); }
+function sfxAlarm(){ beep(440,.35,'sawtooth',.1,0); beep(330,.35,'sawtooth',.1,.35); }
+
+/* ================= STATE ================= */
+let state = null;
+function freshState(){
+  return {
+    teamName:"",
+    started:false,
+    startTime:null,
+    score:0,
+    keys:[], // array of key letters earned, in order
+    stationIndex:0, // index into STATIONS, next station to attempt
+    hintsLeft:3,
+    hintsUsed:0,
+    muted:false,
+    finished:false,
+    finishTime:null,
+    gameover:false,
+    serverRiddleSolved:false
+  };
+}
+function save(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
+function load(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return null;
+}
+function resetAll(){
+  try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+  location.reload();
+}
+
+/* ================= STATION DEFINITIONS ================= */
+// icon() functions return inline SVG strings (no external images, per design constraints)
+function icon(paths){ return `<svg viewBox="0 0 48 48" fill="none" stroke="var(--blue)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">${paths}</svg>`; }
+const ICONS = {
+  lock: icon(`<rect x="12" y="21" width="24" height="18" rx="3"/><path d="M17 21v-6a7 7 0 0 1 14 0v6"/><circle cx="24" cy="29" r="2.4" fill="var(--blue)"/>`),
+  book: icon(`<path d="M8 10c6-3 12-3 16 0v28c-4-3-10-3-16 0z"/><path d="M40 10c-6-3-12-3-16 0v28c4-3 10-3 16 0z"/>`),
+  cpu: icon(`<rect x="14" y="14" width="20" height="20" rx="2"/><rect x="20" y="20" width="8" height="8"/><path d="M14 8v6M24 8v6M34 8v6M14 34v6M24 34v6M34 34v6M8 14h6M8 24h6M8 34h6M34 14h6M34 24h6M34 34h6"/>`),
+  shield: icon(`<path d="M24 6l14 5v11c0 10-6 16-14 20-8-4-14-10-14-20V11z"/><path d="M18 24l4 4 8-9"/>`),
+  eye: icon(`<path d="M4 24s7-13 20-13 20 13 20 13-7 13-20 13S4 24 4 24z"/><circle cx="24" cy="24" r="6"/>`),
+  network: icon(`<circle cx="24" cy="10" r="4"/><circle cx="10" cy="34" r="4"/><circle cx="38" cy="34" r="4"/><circle cx="24" cy="34" r="4"/><path d="M24 14v14M14 32l6-2M34 32l-6-2"/>`),
+  server: icon(`<rect x="10" y="8" width="28" height="12" rx="2"/><rect x="10" y="24" width="28" height="12" rx="2"/><circle cx="16" cy="14" r="1.6" fill="var(--green)"/><circle cx="16" cy="30" r="1.6" fill="var(--green)"/>`)
+};
+// hardware icons for AI Lab vision challenge
+const HW = {
+  keyboard: icon(`<rect x="6" y="16" width="36" height="18" rx="2"/><path d="M11 22h2M17 22h2M23 22h2M29 22h2M35 22h2M11 28h20"/>`),
+  monitor: icon(`<rect x="8" y="8" width="32" height="22" rx="2"/><path d="M18 36h12M24 30v6"/>`),
+  mouse: icon(`<rect x="18" y="10" width="12" height="26" rx="6"/><path d="M24 10v10"/>`),
+  router: icon(`<rect x="8" y="22" width="32" height="12" rx="2"/><path d="M16 22V14M24 22v-10M32 22V14"/><circle cx="34" cy="28" r="1.6" fill="var(--green)"/>`),
+  server_hw: icon(`<rect x="10" y="8" width="28" height="12" rx="2"/><rect x="10" y="24" width="28" height="12" rx="2"/><circle cx="16" cy="14" r="1.6" fill="var(--green)"/><circle cx="16" cy="30" r="1.6" fill="var(--green)"/>`),
+  webcam: icon(`<circle cx="24" cy="22" r="10"/><circle cx="24" cy="22" r="4" fill="var(--blue)"/><path d="M15 36h18"/>`)
+};
+
+const STATIONS = [
+  {
+    id:1, key:'A', name:'Security Office', icon:ICONS.lock,
+    mission:"Verify your identity to access the campus network.",
+    hint:"Read the scrambled letters backward, or rearrange them into a word you use every day to do this puzzle on.",
+    render:(el)=>`
+      <p class="mission-text">MISSION: Unscramble the access word.</p>
+      <div class="puzzle-box">
+        <p class="hud-label">Scrambled</p>
+        <p class="cipher-text">RETUPMOC</p>
+        <input type="text" id="ansSecurity" placeholder="Type the unscrambled word">
+      </div>
+      <div class="btn-row"><button class="btn" id="submitSecurity">Submit</button></div>
+      <p class="feedback" id="fbSecurity"></p>`,
+    bind:(check)=>{
+      document.getElementById('submitSecurity').onclick=()=>check(document.getElementById('ansSecurity').value,'COMPUTER','fbSecurity');
+      document.getElementById('ansSecurity').addEventListener('keydown',e=>{ if(e.key==='Enter') check(e.target.value,'COMPUTER','fbSecurity'); });
+    }
+  },
+  {
+    id:2, key:'I', name:'Library', icon:ICONS.book,
+    mission:"Locate the hidden information in the archive record below.",
+    hint:"Look for the word styled differently from the rest of the paragraph — that's the one to type in.",
+    render:(el)=>`
+      <p class="mission-text">MISSION: Observation task — find the highlighted word.</p>
+      <div class="puzzle-box">
+        <p class="hidden-word-text">Archive record 118‑B: the AI Laboratory's backup credentials are rotated weekly and stored off‑site. Following the intrusion, the last known safe checkpoint was tagged <span class="hl">FIREWALL</span> by the on‑duty technician, dated three days prior to the breach. All other tags in this log are decoys.</p>
+        <input type="text" id="ansLibrary" placeholder="What is the highlighted word?" style="margin-top:12px;">
+      </div>
+      <div class="btn-row"><button class="btn" id="submitLibrary">Submit</button></div>
+      <p class="feedback" id="fbLibrary"></p>`,
+    bind:(check)=>{
+      document.getElementById('submitLibrary').onclick=()=>check(document.getElementById('ansLibrary').value,'FIREWALL','fbLibrary');
+      document.getElementById('ansLibrary').addEventListener('keydown',e=>{ if(e.key==='Enter') check(e.target.value,'FIREWALL','fbLibrary'); });
+    }
+  },
+  {
+    id:3, key:'R', name:'Computer Lab', icon:ICONS.cpu,
+    mission:"Repair the corrupted AI program by rebuilding its execution order.",
+    hint:"Every program starts and ends the same way — think Start, then how data comes in, gets processed, and goes out.",
+    correctOrder:['Start','Input','Process','Output','End'],
+    render:(el)=>{
+      const shuffled = ['Process','End','Start','Output','Input'];
+      return `
+      <p class="mission-text">MISSION: Tap the blocks in the correct program order.</p>
+      <div class="puzzle-box">
+        <p class="hud-label">Your sequence</p>
+        <div class="seq-answer" id="seqAnswer"></div>
+        <p class="hud-label">Available blocks</p>
+        <div class="seq-row" id="seqRow">
+          ${shuffled.map(b=>`<button class="seq-chip" data-block="${b}">${b}</button>`).join('')}
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn secondary" id="seqClear">Clear</button>
+        <button class="btn" id="submitLab">Submit Sequence</button>
+      </div>
+      <p class="feedback" id="fbLab"></p>`;
+    },
+    bind:(check,station)=>{
+      let seq=[];
+      const answerEl=document.getElementById('seqAnswer');
+      function renderSeq(){ answerEl.innerHTML = seq.map(s=>`<span>${s}</span>`).join(''); }
+      document.querySelectorAll('.seq-chip').forEach(btn=>{
+        btn.onclick=()=>{ seq.push(btn.dataset.block); btn.disabled=true; renderSeq(); };
+      });
+      document.getElementById('seqClear').onclick=()=>{
+        seq=[]; renderSeq();
+        document.querySelectorAll('.seq-chip').forEach(b=>b.disabled=false);
+      };
+      document.getElementById('submitLab').onclick=()=>{
+        const answer = seq.join(',');
+        const correct = station.correctOrder.join(',');
+        if(answer===correct){
+          check('MATCH','MATCH','fbLab');
+        } else {
+          check('WRONG','MATCH','fbLab');
+          seq=[]; renderSeq();
+          document.querySelectorAll('.seq-chip').forEach(b=>b.disabled=false);
+        }
+      };
+    }
+  },
+  {
+    id:4, key:'E', name:'Cybersecurity Lab', icon:ICONS.shield,
+    mission:"Decode the intercepted transmission from Shadow Zero.",
+    hint:"This is a Caesar cipher shifted forward by 3. Shift every letter back by 3 (D→A, W→T, F→C...) to decode it.",
+    render:(el)=>`
+      <p class="mission-text">MISSION: Decode the message. Caesar cipher, shift −3.</p>
+      <div class="puzzle-box">
+        <p class="hud-label">Encoded transmission</p>
+        <p class="cipher-text">DWWDFN</p>
+        <input type="text" id="ansCyber" placeholder="Type the decoded word">
+      </div>
+      <div class="btn-row"><button class="btn" id="submitCyber">Submit</button></div>
+      <p class="feedback" id="fbCyber"></p>`,
+    bind:(check)=>{
+      document.getElementById('submitCyber').onclick=()=>check(document.getElementById('ansCyber').value,'ATTACK','fbCyber');
+      document.getElementById('ansCyber').addEventListener('keydown',e=>{ if(e.key==='Enter') check(e.target.value,'ATTACK','fbCyber'); });
+    }
+  },
+  {
+    id:5, key:'S', name:'AI Laboratory', icon:ICONS.eye,
+    mission:"AI Vision Challenge — identify every piece of hardware correctly.",
+    hint:"There are six items: keyboard, monitor, mouse, router, server, webcam. Match each icon to its name.",
+    items:[
+      {id:'a',svg:HW.monitor,answer:'Monitor'},
+      {id:'b',svg:HW.keyboard,answer:'Keyboard'},
+      {id:'c',svg:HW.mouse,answer:'Mouse'},
+      {id:'d',svg:HW.router,answer:'Router'},
+      {id:'e',svg:HW.server_hw,answer:'Server'},
+      {id:'f',svg:HW.webcam,answer:'Webcam'}
+    ],
+    render:(el)=>{
+      const options = ['Keyboard','Monitor','Mouse','Router','Server','Webcam'];
+      return `
+      <p class="mission-text">MISSION: Select the correct label for each device, then submit.</p>
+      <div class="vision-grid" id="visionGrid">
+        ${STATIONS[4].items.map(it=>`
+          <div class="vision-item" data-id="${it.id}" data-answer="${it.answer}">
+            ${it.svg}
+            <select>
+              <option value="">Select…</option>
+              ${options.map(o=>`<option value="${o}">${o}</option>`).join('')}
+            </select>
+          </div>`).join('')}
+      </div>
+      <div class="btn-row"><button class="btn" id="submitVision">Submit All</button></div>
+      <p class="feedback" id="fbVision"></p>`;
+    },
+    bind:(check)=>{
+      document.getElementById('submitVision').onclick=()=>{
+        const items = document.querySelectorAll('#visionGrid .vision-item');
+        let allCorrect=true;
+        items.forEach(it=>{
+          const sel = it.querySelector('select');
+          if(sel.value===it.dataset.answer){ it.classList.add('correct'); sel.disabled=true; }
+          else { allCorrect=false; it.classList.remove('correct'); }
+        });
+        check(allCorrect?'ALLCORRECT':'WRONG','ALLCORRECT','fbVision');
+      };
+    }
+  },
+  {
+    id:6, key:'X', name:'Network Centre', icon:ICONS.network,
+    mission:"Reinforce the network before Shadow Zero cuts it off.",
+    hint:"Think about which topology has the most alternate paths if one connection fails.",
+    render:(el)=>`
+      <p class="mission-text">MISSION: Which network topology has the highest fault tolerance?</p>
+      <div class="mcq-grid" id="mcqGrid">
+        ${['Bus','Ring','Star','Mesh'].map(o=>`<button class="mcq-opt" data-opt="${o}">${o}</button>`).join('')}
+      </div>
+      <p class="feedback" id="fbNetwork"></p>`,
+    bind:(check)=>{
+      document.querySelectorAll('#mcqGrid .mcq-opt').forEach(btn=>{
+        btn.onclick=()=>{
+          const correct = btn.dataset.opt==='Mesh';
+          document.querySelectorAll('#mcqGrid .mcq-opt').forEach(b=>b.disabled=true);
+          btn.classList.add(correct?'correct':'wrong');
+          check(btn.dataset.opt,'Mesh','fbNetwork');
+          if(!correct) setTimeout(()=>document.querySelectorAll('#mcqGrid .mcq-opt').forEach(b=>{b.disabled=false;b.classList.remove('wrong');}),700);
+        };
+      });
+    }
+  },
+  {
+    id:7, key:'7', name:'Server Room', icon:ICONS.server,
+    mission:"Final checkpoint. Answer the system prompt, then enter the override code.",
+    hint:"AI is short for two words: what kind of intelligence, and what type.",
+    render:(el)=>`
+      <p class="mission-text">MISSION: Answer the final system prompt to receive the last key.</p>
+      <div class="puzzle-box">
+        <p class="hud-label">System prompt</p>
+        <p style="font-family:var(--font-mono);color:var(--text);margin:8px 0;">"What does AI stand for?"</p>
+        <input type="text" id="ansServer" placeholder="Type your answer">
+      </div>
+      <div class="btn-row"><button class="btn" id="submitServer">Submit</button></div>
+      <p class="feedback" id="fbServer"></p>
+      <div id="passwordArea" style="display:none;margin-top:20px;">
+        <p class="hud-label" style="text-align:center;">Enter the override code using your collected keys</p>
+        <div class="password-display" id="pwDisplay"></div>
+        <input type="text" id="ansPassword" placeholder="Type the 7-character override code" style="text-align:center;text-transform:uppercase;">
+        <div class="btn-row"><button class="btn" id="submitPassword">Deactivate Virus</button></div>
+        <p class="feedback" id="fbPassword"></p>
+      </div>`,
+    bind:(check)=>{
+      document.getElementById('submitServer').onclick=()=>{
+        const val = document.getElementById('ansServer').value.trim().toLowerCase();
+        const ok = val==='artificial intelligence';
+        const fb = document.getElementById('fbServer');
+        if(ok){
+          fb.textContent="Correct. Final key acquired."; fb.className='feedback ok';
+          document.getElementById('submitServer').disabled=true;
+          document.getElementById('ansServer').disabled=true;
+          if(!state.serverRiddleSolved){
+            state.serverRiddleSolved=true;
+            addScore(100); addKey('7'); sfxKey();
+            save(); renderHud();
+          }
+          document.getElementById('passwordArea').style.display='block';
+          document.getElementById('pwDisplay').innerHTML = state.keys.map(k=>`<div class="pw-letter">${k}</div>`).join('');
+        } else {
+          fb.textContent="Not quite. Try again."; fb.className='feedback bad';
+          addScore(-20); sfxWrong(); renderHud();
+        }
+      };
+      document.getElementById('ansServer').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('submitServer').click(); });
+    }
+  }
+];
+const FINAL_PASSWORD = "AIRESX7";
+
+/* ================= SCORE / KEY HELPERS ================= */
+function addScore(n){ state.score = Math.max(0, state.score+n); }
+function addKey(k){ if(!state.keys.includes(k)) state.keys.push(k); }
+
+/* ================= TIMER ================= */
+let timerHandle=null;
+function secondsLeft(){
+  if(!state.startTime) return TOTAL_SECONDS;
+  const elapsed = Math.floor((Date.now()-state.startTime)/1000);
+  return Math.max(0, TOTAL_SECONDS-elapsed);
+}
+function fmtTime(sec){
+  const m=Math.floor(sec/60), s=sec%60;
+  return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+function tick(){
+  const left = secondsLeft();
+  const t1=document.getElementById('timerVal'), t2=document.getElementById('timerValStation');
+  const txt = fmtTime(left);
+  if(t1){ t1.textContent=txt; t1.classList.toggle('warn', left<=300); }
+  if(t2){ t2.textContent=txt; t2.classList.toggle('warn', left<=300); }
+  if(left<=0 && !state.finished && !state.gameover){
+    state.gameover=true; save(); sfxAlarm(); showGameOver();
+  }
+}
+
+/* ================= PARTICLES ================= */
+(function particles(){
+  const canvas=document.getElementById('particles');
+  const ctx=canvas.getContext('2d');
+  let w,h,pts=[];
+  function resize(){ w=canvas.width=window.innerWidth; h=canvas.height=window.innerHeight; }
+  window.addEventListener('resize',resize); resize();
+  const N = REDUCE_MOTION ? 0 : Math.min(70, Math.floor((w*h)/22000));
+  for(let i=0;i<N;i++){
+    pts.push({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-.5)*.25,vy:(Math.random()-.5)*.25});
+  }
+  function draw(){
+    ctx.clearRect(0,0,w,h);
+    ctx.fillStyle='rgba(0,217,255,0.55)';
+    for(const p of pts){
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0||p.x>w) p.vx*=-1;
+      if(p.y<0||p.y>h) p.vy*=-1;
+      ctx.beginPath(); ctx.arc(p.x,p.y,1.6,0,Math.PI*2); ctx.fill();
+    }
+    ctx.strokeStyle='rgba(0,217,255,0.12)';
+    for(let i=0;i<pts.length;i++){
+      for(let j=i+1;j<pts.length;j++){
+        const dx=pts[i].x-pts[j].x, dy=pts[i].y-pts[j].y;
+        const d=Math.sqrt(dx*dx+dy*dy);
+        if(d<120){ ctx.beginPath(); ctx.moveTo(pts[i].x,pts[i].y); ctx.lineTo(pts[j].x,pts[j].y); ctx.stroke(); }
+      }
+    }
+    if(!REDUCE_MOTION) requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ================= SCREEN NAV ================= */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ================= RENDER: HUD / MAP ================= */
+function renderHud(){
+  const scoreEls=[document.getElementById('hudScore'),document.getElementById('hudScoreStation')];
+  scoreEls.forEach(e=>{ if(e) e.textContent=state.score; });
+  const teamEl=document.getElementById('hudTeam'); if(teamEl) teamEl.textContent=state.teamName;
+  const hintsEl=document.getElementById('hudHints'); if(hintsEl) hintsEl.textContent=state.hintsLeft;
+  const keyring=document.getElementById('keyring');
+  if(keyring){
+    keyring.innerHTML = STATIONS.map(st=>{
+      const filled = state.keys.includes(st.key);
+      return `<div class="key-slot ${filled?'filled':''}" title="${st.name}">${filled?st.key:'?'}</div>`;
+    }).join('');
+  }
+  const fill=document.getElementById('progressFill');
+  if(fill) fill.style.width = Math.round((state.keys.length/7)*100)+'%';
+  const muteBtn=document.getElementById('btnMute');
+  if(muteBtn) muteBtn.textContent = 'SOUND: '+(state.muted?'OFF':'ON');
+}
+
+function renderMap(){
+  const grid=document.getElementById('mapGrid');
+  grid.innerHTML = STATIONS.map((st,i)=>{
+    let status='LOCKED', cls='locked';
+    if(state.keys.includes(st.key)){ status='COMPLETE'; cls='done'; }
+    else if(i===state.stationIndex){ status='UNLOCKED'; cls='current'; }
+    return `
+      <button class="panel station-card ${cls}" data-index="${i}" ${cls==='locked'?'disabled':''}>
+        <span class="badge">${String(i+1).padStart(2,'0')}/07</span>
+        <div class="sicon">${st.icon}</div>
+        <h3>${st.name}</h3>
+        <p class="status">${status}</p>
+      </button>`;
+  }).join('');
+  grid.querySelectorAll('.station-card:not(.locked)').forEach(btn=>{
+    btn.onclick=()=>openStation(parseInt(btn.dataset.index,10));
+  });
+}
+
+/* ================= STATION LOGIC ================= */
+let currentStationIndex=null;
+function openStation(i){
+  currentStationIndex=i;
+  const st=STATIONS[i];
+  const view=document.getElementById('stationView');
+  view.innerHTML = `
+    <div class="station-head">
+      <div>
+        <p class="eyebrow">STATION ${String(i+1).padStart(2,'0')}/07</p>
+        <h2>${st.name}</h2>
+      </div>
+      <div style="width:34px;">${st.icon}</div>
+    </div>
+    ${st.render()}
+  `;
+  const alreadyDone = state.keys.includes(st.key);
+  st.bind(handleCheck, st);
+  if(alreadyDone){
+    // station already solved (e.g. revisited) — show as complete, disable inputs
+    view.querySelectorAll('input,select,button').forEach(el=>{
+      if(el.id!=='submitServer' || st.id!==7){ el.disabled=true; }
+    });
+    const fb=view.querySelector('.feedback');
+    if(fb){ fb.textContent='Already secured. Key '+st.key+' collected.'; fb.className='feedback ok'; }
+  }
+  renderHud();
+  showScreen('screen-station');
+}
+
+function handleCheck(given, correct, feedbackId){
+  const st=STATIONS[currentStationIndex];
+  const fb=document.getElementById(feedbackId);
+  const isCorrect = given===correct;
+  if(isCorrect){
+    fb.textContent = 'Access granted. Security Key '+st.key+' acquired.';
+    fb.className='feedback ok';
+    if(!state.keys.includes(st.key)){
+      addScore(100);
+      addKey(st.key);
+      if(state.stationIndex===currentStationIndex) state.stationIndex = Math.min(STATIONS.length-1, currentStationIndex+1);
+      sfxKey();
+    }
+    save(); renderHud();
+    if(st.id===7){
+      setupPassword();
+    } else {
+      setTimeout(()=>{ renderMap(); showScreen('screen-map'); }, 900);
+    }
+  } else {
+    fb.textContent = 'Access denied. Try again. (−20 pts)';
+    fb.className='feedback bad';
+    addScore(-20);
+    sfxWrong();
+    save(); renderHud();
+  }
+}
+
+function setupPassword(){
+  document.getElementById('submitPassword').onclick=()=>{
+    const val = document.getElementById('ansPassword').value.trim().toUpperCase();
+    const fb = document.getElementById('fbPassword');
+    if(val===FINAL_PASSWORD){
+      fb.textContent='Override accepted. Servers secured.'; fb.className='feedback ok';
+      addScore(100);
+      finishGame();
+    } else {
+      fb.textContent='Incorrect override code. Try again. (−20 pts)'; fb.className='feedback bad';
+      addScore(-20); sfxWrong(); renderHud(); save();
+    }
+  };
+  document.getElementById('ansPassword').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('submitPassword').click(); });
+}
+
+function finishGame(){
+  state.finished=true;
+  state.finishTime=Date.now();
+  save();
+  sfxVictory();
+  showVictory();
+}
+
+/* ================= HINTS ================= */
+function useHint(){
+  if(state.hintsLeft<=0 || currentStationIndex===null) return;
+  const st=STATIONS[currentStationIndex];
+  state.hintsLeft--; state.hintsUsed++;
+  addScore(-10);
+  save(); renderHud();
+  document.getElementById('hintText').textContent = st.hint;
+  document.getElementById('hintOverlay').classList.add('active');
+}
+
+/* ================= VICTORY / GAMEOVER SCREENS ================= */
+function showVictory(){
+  document.getElementById('victoryTeam').textContent=state.teamName;
+  document.getElementById('victoryScore').textContent=state.score;
+  const elapsedSec = Math.floor((state.finishTime-state.startTime)/1000);
+  document.getElementById('victoryTime').textContent=fmtTime(elapsedSec);
+  document.getElementById('victoryHints').textContent=state.hintsUsed;
+  showScreen('screen-victory');
+}
+function showGameOver(){
+  document.getElementById('gameoverTeam').textContent=state.teamName;
+  document.getElementById('gameoverScore').textContent=state.score;
+  document.getElementById('gameoverKeys').textContent=state.keys.length;
+  showScreen('screen-gameover');
+}
+
+/* ================= CERTIFICATE ================= */
+function downloadCertificate(){
+  const c=document.createElement('canvas');
+  c.width=1200; c.height=850;
+  const ctx=c.getContext('2d');
+  const grad=ctx.createLinearGradient(0,0,1200,850);
+  grad.addColorStop(0,'#060a14'); grad.addColorStop(1,'#0d1a33');
+  ctx.fillStyle=grad; ctx.fillRect(0,0,1200,850);
+  ctx.strokeStyle='#00d9ff'; ctx.lineWidth=4; ctx.strokeRect(30,30,1140,790);
+  ctx.strokeStyle='rgba(0,217,255,.4)'; ctx.lineWidth=1; ctx.strokeRect(46,46,1108,758);
+  ctx.textAlign='center';
+  ctx.fillStyle='#6d84a8'; ctx.font='22px monospace';
+  ctx.fillText('A.I.R.E.S. INCIDENT · CERTIFICATE OF RECOVERY', 600, 150);
+  ctx.fillStyle='#ffffff'; ctx.font='bold 58px sans-serif';
+  ctx.fillText('SAVE MSU AI LAB', 600, 230);
+  ctx.fillStyle='#00ffa3'; ctx.font='bold 30px monospace';
+  ctx.fillText('VIRUS DEACTIVATED', 600, 285);
+  ctx.fillStyle='#cfe0f5'; ctx.font='24px sans-serif';
+  ctx.fillText('This certifies that the team', 600, 380);
+  ctx.fillStyle='#00d9ff'; ctx.font='bold 52px monospace';
+  ctx.fillText(state.teamName || 'TEAM', 600, 450);
+  ctx.fillStyle='#cfe0f5'; ctx.font='24px sans-serif';
+  ctx.fillText('successfully recovered all 7 Security Keys', 600, 510);
+  ctx.fillText('and secured the MSU Artificial Intelligence Laboratory.', 600, 545);
+  const elapsedSec = state.finishTime && state.startTime ? Math.floor((state.finishTime-state.startTime)/1000) : 0;
+  ctx.font='22px monospace'; ctx.fillStyle='#ffb020';
+  ctx.fillText('SCORE: '+state.score+'      TIME: '+fmtTime(elapsedSec)+'      DATE: '+new Date().toLocaleDateString(), 600, 640);
+  ctx.fillStyle='#6d84a8'; ctx.font='16px monospace';
+  ctx.fillText('MANAGEMENT & SCIENCE UNIVERSITY · VIRTUAL EXPLORE RACE', 600, 760);
+  const url=c.toDataURL('image/png');
+  const a=document.createElement('a');
+  a.href=url; a.download='certificate-'+(state.teamName||'team').replace(/\s+/g,'_')+'.png';
+  a.click();
+}
+
+/* ================= EVENT WIRING ================= */
+document.getElementById('openHostGuide').onclick=()=>{
+  const el=document.getElementById('hostGuide');
+  el.style.display = el.style.display==='none' ? 'block' : 'none';
+};
+
+document.getElementById('btnToTeam').onclick=()=>{ showScreen('screen-team'); };
+
+document.getElementById('btnToBriefing').onclick=()=>{
+  const val=document.getElementById('teamNameInput').value.trim();
+  const err=document.getElementById('teamNameError');
+  if(!val){ err.textContent='Enter a team name to continue.'; return; }
+  err.textContent='';
+  state.teamName=val;
+  save();
+  document.getElementById('briefTeamName').textContent=val;
+  showScreen('screen-briefing');
+};
+document.getElementById('teamNameInput').addEventListener('keydown',e=>{ if(e.key==='Enter') document.getElementById('btnToBriefing').click(); });
+
+document.getElementById('btnToMap').onclick=()=>{
+  if(!state.started){
+    state.started=true;
+    state.startTime=Date.now();
+    save();
+    if(!timerHandle) timerHandle=setInterval(tick,1000);
+  }
+  renderHud(); renderMap();
+  showScreen('screen-map');
+};
+
+document.getElementById('btnBackMap').onclick=()=>{ renderMap(); showScreen('screen-map'); };
+
+document.getElementById('btnMute').onclick=()=>{ state.muted=!state.muted; save(); renderHud(); };
+
+document.getElementById('btnHint').onclick=useHint;
+document.getElementById('btnCloseHint').onclick=()=>document.getElementById('hintOverlay').classList.remove('active');
+
+document.getElementById('btnCertificate').onclick=downloadCertificate;
+document.getElementById('btnRestartVictory').onclick=resetAll;
+document.getElementById('btnRestartGameover').onclick=resetAll;
+
+/* Admin */
+document.getElementById('btnAdminOpen').onclick=()=>document.getElementById('adminOverlay').classList.add('active');
+document.getElementById('btnAdminClose').onclick=()=>document.getElementById('adminOverlay').classList.remove('active');
+document.getElementById('btnAdminUnlock').onclick=()=>{
+  const val=document.getElementById('adminPassInput').value;
+  if(val===HOST_PASSWORD){
+    document.getElementById('adminPanel').style.display='block';
+    const raw = load();
+    document.getElementById('adminInfo').textContent = raw ? JSON.stringify(raw,null,2) : 'No active run stored on this device yet.';
+  } else {
+    document.getElementById('adminInfo').textContent='';
+    document.getElementById('adminPanel').style.display='none';
+    alert('Incorrect password.');
+  }
+};
+document.getElementById('btnAdminReset').onclick=()=>{
+  if(confirm('This clears the current run on this device. Continue?')) resetAll();
+};
+
+/* ================= INIT ================= */
+function init(){
+  const loaded = load();
+  state = loaded || freshState();
+  if(!loaded) save();
+
+  if(state.finished){ renderHud(); showVictory(); return; }
+  if(state.gameover){ renderHud(); showGameOver(); return; }
+
+  if(state.started){
+    if(!timerHandle) timerHandle=setInterval(tick,1000);
+    renderHud(); renderMap(); tick();
+    showScreen('screen-map');
+  } else if(state.teamName){
+    document.getElementById('teamNameInput').value=state.teamName;
+    document.getElementById('briefTeamName').textContent=state.teamName;
+    showScreen('screen-briefing');
+  } else {
+    showScreen('screen-instructions');
+  }
+}
+init();
+
+})();
+</script>
+</body>
+</html>
